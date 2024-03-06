@@ -1,4 +1,12 @@
-/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/MyParser.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Models/Project.java
 /Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/P1compi1.java
-/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/sym.java
-/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/ProyLexer.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/InputFileHandle/InputFileLexer.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Frames/MainFrame.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Models/InputFileHandler.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Models/FileItem.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Models/DirectoryItem.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Models/ProjectItem.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/Frames/MainPanel.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/InputFileHandle/InputFileParser.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/InputFileHandle/sym.java
+/Users/robertob/NetBeansProjects/p1compi1/src/main/java/edu/robertob/p1compi1/InputFileHandle/Token.java

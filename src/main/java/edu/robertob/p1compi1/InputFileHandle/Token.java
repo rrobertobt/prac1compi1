@@ -1,4 +1,4 @@
-package edu.robertob.p1compi1.Lexer;
+package edu.robertob.p1compi1.InputFileHandle;
 
 /*
 * <PROYECTO nombre="proy-name">

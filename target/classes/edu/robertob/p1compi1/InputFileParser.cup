@@ -1,0 +1,107 @@
+// CUP FILE:
+package edu.robertob.p1compi1.InputFileHandle;
+
+import edu.robertob.p1compi1.Models.*;
+import java_cup.runtime.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Stack;
+
+parser code {:
+    private Project project;
+    private DirectoryItem currentDirectory;
+    private Stack<DirectoryItem> directoryStack = new Stack<>();
+
+    public Project getProject() {
+        return project;
+    }
+
+    public InputFileParser(InputFileLexer lexer) {
+        super(lexer);
+    }
+
+    protected int error_sync_size() {
+        return 10;
+    }
+:}
+terminal TAG_OPEN, TAG_CLOSE, TAG_CLOSE_REVERSE, EQUALS, QUOTE, TAG_SELF_CLOSE;
+terminal TAG_NAME_PROJECT, TAG_NAME_FILE, TAG_NAME_FOLDER;
+terminal TAG_ATTRIBUTE_NAME, TAG_ATTRIBUTE_LOCATION;
+terminal String TAG_ATTRIBUTE_VALUE, ILLEGAL;
+
+nonterminal program, project, project_open_tag, project_close_tag, attribute_value, content, element, file_tag, folder_tag, name_attribute, location_attribute;
+nonterminal folder_open_tag, folder_close_tag, directory_tag, directory_open_tag, directory_close_tag, file_or_folder_list;
+
+start with program;
+
+program ::= project {: RESULT = project; :}
+    ;
+
+// INITIAL PRODUCTION
+project ::=
+    project_open_tag content project_close_tag {: RESULT = project; :}
+    | error:e {:System.out.println("Error: " + e); :}
+    ;
+
+// FILES RELATED PRODUCTIONS
+project_open_tag ::=
+    TAG_OPEN TAG_NAME_PROJECT name_attribute:projName TAG_CLOSE {:
+        System.out.println("Project name: " + (String)projName);
+        project = new Project((String)projName);
+        currentDirectory = project.getContent();
+     :}
+    ;
+
+project_close_tag ::= TAG_CLOSE_REVERSE TAG_NAME_PROJECT TAG_CLOSE;
+
+// FOLDER RELATED PRODUCTIONS
+directory_open_tag ::=
+    TAG_OPEN TAG_NAME_FOLDER name_attribute:folderName TAG_CLOSE {:
+    System.out.println("Folder name: " + folderName);
+    DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+            currentDirectory.getContent().add(newDir);
+            directoryStack.push(currentDirectory);
+            System.out.println("test");
+            currentDirectory = newDir;
+            RESULT = folderName;
+    :}
+    ;
+
+directory_close_tag ::= TAG_CLOSE_REVERSE TAG_NAME_FOLDER TAG_CLOSE {: currentDirectory = directoryStack.pop(); :};
+
+directory_tag ::=
+    directory_open_tag:dirName content directory_close_tag {:
+
+    :}
+    ;
+
+// FILE RELATED PRODUCTIONS
+file_tag ::=
+    TAG_OPEN TAG_NAME_FILE name_attribute:nameAttr location_attribute:locationAttr TAG_SELF_CLOSE {: System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
+    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+     :}
+    | TAG_OPEN TAG_NAME_FILE location_attribute:locationAttr name_attribute:nameAttr TAG_SELF_CLOSE {: System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
+    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+    :}
+    | error:e {: System.out.println("Error"+eleft); :} TAG_SELF_CLOSE
+    ;
+
+// ATTRIBUTE RELATED PRODUCTIONS
+name_attribute ::= TAG_ATTRIBUTE_NAME EQUALS attribute_value:attrValue {: RESULT = attrValue; :};
+
+location_attribute ::= TAG_ATTRIBUTE_LOCATION EQUALS attribute_value:attrValue {: RESULT = attrValue; :};
+
+attribute_value ::=
+    TAG_ATTRIBUTE_VALUE:attrValue {: RESULT = attrValue.substring(1,  attrValue.length() - 1); :}
+    ;
+
+// CONTENT
+content ::=
+    file_or_folder_list
+    ;
+
+file_or_folder_list ::=
+    file_or_folder_list file_tag
+    | file_or_folder_list directory_tag
+    |
+    ;
