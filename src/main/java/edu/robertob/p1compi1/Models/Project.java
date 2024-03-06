@@ -5,9 +5,10 @@ import java.util.List;
 
 
 public class Project {
+    private String fileFullPath;
     private String name;
 //    private List<ProjectItem> content;
-    private DirectoryItem rootContent = new DirectoryItem("root", new ArrayList<>());
+    private DirectoryItem rootContent = new DirectoryItem("Raiz del proyecto", new ArrayList<>());
 
     public Project(String name) {
         this.name = name;
@@ -57,5 +58,13 @@ public class Project {
 
     public DirectoryItem getContent() {
         return rootContent;
+    }
+
+    public String getFileFullPath() {
+        return fileFullPath;
+    }
+
+    public void setFileFullPath(String fileFullPath) {
+        this.fileFullPath = fileFullPath;
     }
 }

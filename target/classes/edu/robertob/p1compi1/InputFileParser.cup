@@ -11,9 +11,14 @@ parser code {:
     private Project project;
     private DirectoryItem currentDirectory;
     private Stack<DirectoryItem> directoryStack = new Stack<>();
+    private List<String> errors = new ArrayList<>();
 
     public Project getProject() {
         return project;
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 
     public InputFileParser(InputFileLexer lexer) {
@@ -22,6 +27,15 @@ parser code {:
 
     protected int error_sync_size() {
         return 10;
+    }
+
+    private boolean isNameDuplicate(DirectoryItem directory, String name) {
+        for (ProjectItem item : directory.getContent()) {
+            if (item.getName().equals(name)) {
+                return true; // Name already exists
+            }
+        }
+        return false; // Name is not a duplicate
     }
 :}
 terminal TAG_OPEN, TAG_CLOSE, TAG_CLOSE_REVERSE, EQUALS, QUOTE, TAG_SELF_CLOSE;
@@ -57,13 +71,21 @@ project_close_tag ::= TAG_CLOSE_REVERSE TAG_NAME_PROJECT TAG_CLOSE;
 // FOLDER RELATED PRODUCTIONS
 directory_open_tag ::=
     TAG_OPEN TAG_NAME_FOLDER name_attribute:folderName TAG_CLOSE {:
-    System.out.println("Folder name: " + folderName);
-    DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+        if (isNameDuplicate(currentDirectory, (String)folderName)) {
+            errors.add("- Directorio parece estar duplicado: " + folderName + " en " + currentDirectory.getName() + "Lin:" + folderNameleft + "Col:" + folderNameright + "\n");
+            DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+            currentDirectory = newDir;
+            directoryStack.push(currentDirectory);
+            RESULT = folderName;
+        } else {
+            DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+            newDir.setParent(currentDirectory);
             currentDirectory.getContent().add(newDir);
             directoryStack.push(currentDirectory);
-            System.out.println("test");
+            System.out.println(directoryStack.size() + " " + currentDirectory.getName() + " " + newDir.getName());
             currentDirectory = newDir;
             RESULT = folderName;
+        }
     :}
     ;
 
@@ -78,10 +100,24 @@ directory_tag ::=
 // FILE RELATED PRODUCTIONS
 file_tag ::=
     TAG_OPEN TAG_NAME_FILE name_attribute:nameAttr location_attribute:locationAttr TAG_SELF_CLOSE {: System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
-    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+        if (isNameDuplicate(currentDirectory, (String)nameAttr)) {
+            errors.add("- Archivo parece estar duplicado: " + nameAttr + " en " + currentDirectory.getName() + "Lin:" + nameAttrleft + "Col:" + nameAttrright + "\n");
+        } else {
+            var newFile = new FileItem((String)nameAttr, (String)locationAttr);
+            newFile.setParent(currentDirectory);
+            currentDirectory.getContent().add(newFile);
+
+
+        }
      :}
     | TAG_OPEN TAG_NAME_FILE location_attribute:locationAttr name_attribute:nameAttr TAG_SELF_CLOSE {: System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
-    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+        if (isNameDuplicate(currentDirectory, (String)nameAttr)) {
+            errors.add("- Archivo parece estar duplicado: " + nameAttr + " en " + currentDirectory.getName() + "Lin:" + nameAttrleft + "Col:" + nameAttrright + "\n");
+        } else {
+            var newFile = new FileItem((String)nameAttr, (String)locationAttr);
+            newFile.setParent(currentDirectory);
+            currentDirectory.getContent().add(newFile);
+        }
     :}
     | error:e {: System.out.println("Error"+eleft); :} TAG_SELF_CLOSE
     ;

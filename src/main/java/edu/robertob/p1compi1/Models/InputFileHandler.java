@@ -14,6 +14,7 @@ import javax.swing.filechooser.FileSystemView;
  * @author robertob
  */
 public class InputFileHandler {
+    protected String fileFullPath;
     
     public String createIdeFileChooser () throws FileNotFoundException {
         JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
@@ -23,10 +24,11 @@ public class InputFileHandler {
         Scanner scanner = new Scanner(fileChooser.getSelectedFile());
         StringBuilder sb = new StringBuilder();
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine());
+            sb.append(scanner.nextLine()).append("\n");
         }
         scanner.close();
-        System.out.println(sb.toString());
+//        System.out.println(sb.toString());
+        this.fileFullPath = fileChooser.getSelectedFile().getAbsolutePath();
         return sb.toString();
     }
     

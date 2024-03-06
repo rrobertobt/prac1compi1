@@ -7,6 +7,8 @@ package edu.robertob.p1compi1.Models;
 public class FileItem extends ProjectItem {
     private String location;
 
+    private DirectoryItem parent;
+
     public FileItem(String name, String location) {
         super(name);
         this.location = location;
@@ -20,5 +22,15 @@ public class FileItem extends ProjectItem {
         this.location = location;
     }
 
-    
+    public String toString() {
+        return this.getName();
+    }
+
+    public DirectoryItem getParent() {
+        return parent;
+    }
+
+    public void setParent(DirectoryItem parent) {
+        this.parent = parent;
+    }
 }

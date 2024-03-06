@@ -4,17 +4,49 @@
  */
 package edu.robertob.p1compi1.Frames;
 
+import edu.robertob.p1compi1.Models.DirectoryItem;
+import edu.robertob.p1compi1.Models.FileItem;
+import edu.robertob.p1compi1.Models.Project;
+import edu.robertob.p1compi1.Utils.ProjectUtils;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author robertob
  */
 public class MainPanel extends javax.swing.JPanel {
+    Project currentProject;
+
+    final TreeDirectoryContextMenu treeDirectoryContextMenu = new TreeDirectoryContextMenu(this);
+    final TreeFileContextMenu treeFileContextMenu = new TreeFileContextMenu(this);
+    // create joption pane with a text field to add the name of the new directory
+    final JOptionPane addDirectoryOptionPane = new JOptionPane();
+
+    public JPanel getjPanel1() {
+        return jPanel1;
+    }
+
+    public JTree getjTree1() {
+        return jTree1;
+    }
 
     /**
      * Creates new form MainPanel
      */
-    public MainPanel() {
+    public MainPanel(Project project) {
         initComponents();
+        this.currentProject = project;
+        // set background color to white
+//        this.setBackground(new java.awt.Color(255, 255, 255));
     }
 
     /**
@@ -28,45 +60,249 @@ public class MainPanel extends javax.swing.JPanel {
 
         jLabel1 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTree1 = new javax.swing.JTree();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
 
-        jLabel1.setText("Arbol de ficheros");
+        setPreferredSize(new java.awt.Dimension(800, 600));
+
+        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        jLabel1.setText("ARBOL DE FICHEROS");
+
+        jPanel1.setForeground(new java.awt.Color(204, 51, 255));
+
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
+        jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jTree1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTree1MouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTree1);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 154, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 430, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
         );
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jLabel2.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        jLabel2.setText("VISTA DE FICHERO");
+
+        jTextArea1.setEditable(false);
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane2.setViewportView(jTextArea1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 389, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addContainerGap(435, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane2)
+                        .addGap(14, 14, 14))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    public void showAddFileDialog() {
+        JTextField fileName = new JTextField(10);
+        JTextField fileLocation = new JTextField(10);
+
+        JPanel myPanel = new JPanel();
+        myPanel.add(new JLabel("Nombre del archivo:"));
+        myPanel.add(fileName);
+        myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+        myPanel.add(new JLabel("Ubicación:"));
+        myPanel.add(fileLocation);
+
+        int result = JOptionPane.showConfirmDialog(null, myPanel,
+                 "Por favor ingrese el nombre del archivo y su ubicación", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            System.out.println("Name: " + fileName.getText());
+            System.out.println("Location: " + fileLocation.getText());
+            // add the file to the tree
+            DefaultMutableTreeNode selectedNode = getCurrentSelectedNode();
+            System.out.println(((DirectoryItem) selectedNode.getUserObject()).getContent());
+            if (selectedNode == null) {
+                JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (((selectedNode.getUserObject()).getClass() != DirectoryItem.class)) {
+                JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            FileItem fileItem = new FileItem(fileName.getText(), fileLocation.getText());
+            Boolean added = ((DirectoryItem) selectedNode.getUserObject()).addFile(fileItem);
+            fileItem.setParent((DirectoryItem) selectedNode.getUserObject());
+
+            if (!added) return;
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(fileItem);
+            selectedNode.add(newNode);
+            ((DefaultTreeModel) jTree1.getModel()).reload(selectedNode);
+            ProjectUtils.printProject(currentProject, currentProject.getContent().getContent(), 0);
+
+        }
+    }
+    public void showAddDirectoryDialog() {
+        String name = JOptionPane.showInputDialog(this, "Nombre del directorio", "Crear directorio", JOptionPane.PLAIN_MESSAGE);
+        if (name != null) {
+            System.out.println("Name: " + name);
+            // add the directory to the tree
+            DefaultMutableTreeNode selectedNode = getCurrentSelectedNode();
+            if (selectedNode == null) {
+                JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (((selectedNode.getUserObject()).getClass() != DirectoryItem.class)) {
+                JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            DirectoryItem directoryItem = new DirectoryItem(name, new ArrayList<>());
+            var selectedDirectory = (DirectoryItem) selectedNode.getUserObject();
+            Boolean added = selectedDirectory.addDirectory(directoryItem);
+            directoryItem.setParent(selectedDirectory);
+            if (!added) return;
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(directoryItem);
+            selectedNode.add(newNode);
+            ((DefaultTreeModel) jTree1.getModel()).reload(selectedNode);
+            ProjectUtils.printProject(currentProject, currentProject.getContent().getContent(), 0);
+        }
+    }
+
+    public void deleteSelectedDirectory() {
+        Integer confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar este directorio?", "Eliminar directorio", JOptionPane.YES_NO_OPTION);
+        if (confirm != 0) return;
+        DefaultMutableTreeNode selectedNode = getCurrentSelectedNode();
+        if (selectedNode == null) {
+            JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (((selectedNode.getUserObject()).getClass() != DirectoryItem.class)) {
+            JOptionPane.showMessageDialog(this, "No se ha seleccionado un directorio", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        var selectedDirectory = (DirectoryItem) selectedNode.getUserObject();
+        if (selectedDirectory.getParent() == null) {
+            JOptionPane.showMessageDialog(this, "No se puede eliminar el directorio raíz", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        selectedDirectory.getParent().getContent().remove(selectedDirectory);
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        parent.remove(selectedNode);
+        ((DefaultTreeModel) jTree1.getModel()).reload(parent);
+        ProjectUtils.printProject(currentProject, currentProject.getContent().getContent(), 0);
+    }
+
+    public void deleteSelectedFile () {
+        Integer confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea eliminar este archivo?", "Eliminar archivo", JOptionPane.YES_NO_OPTION);
+        if (confirm != 0) return;
+        DefaultMutableTreeNode selectedNode = getCurrentSelectedNode();
+        if (selectedNode == null) {
+            JOptionPane.showMessageDialog(this, "No se ha seleccionado un archivo", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (((selectedNode.getUserObject()).getClass() != FileItem.class)) {
+            JOptionPane.showMessageDialog(this, "No se ha seleccionado un archivo", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        var selectedFile = (FileItem) selectedNode.getUserObject();
+        selectedFile.getParent().getContent().remove(selectedFile);
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        parent.remove(selectedNode);
+        ((DefaultTreeModel) jTree1.getModel()).reload(parent);
+        ProjectUtils.printProject(currentProject, currentProject.getContent().getContent(), 0);
+    }
+    private void jTree1MouseClicked(MouseEvent evt) {//GEN-FIRST:event_jTree1MouseClicked
+
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent();
+
+        if (SwingUtilities.isRightMouseButton(evt) && selectedNode != null && ((selectedNode.getUserObject()).getClass() == DirectoryItem.class)){
+            System.out.println("Right click and is a directory");
+            treeDirectoryContextMenu.show(jTree1, evt.getX(), evt.getY());
+            return;
+        };
+
+        if (SwingUtilities.isRightMouseButton(evt) && selectedNode != null && ((selectedNode.getUserObject()).getClass() == FileItem.class)){
+            System.out.println("Right click and is a file");
+            treeFileContextMenu.show(jTree1, evt.getX(), evt.getY());
+            return;
+        };
+
+        // try to get the content of the file using the location inside the operating system
+        // before, check if the location is available, since we can select folders and they don't have a location
+
+        if (selectedNode == null || ((selectedNode.getUserObject()).getClass() == DirectoryItem.class)) return;
+
+        Path path = Paths.get(((FileItem) selectedNode.getUserObject()).getLocation());
+        try {
+            List<String> read = Files.readAllLines(path);
+            StringBuilder sb = new StringBuilder();
+            for (String line : read) {
+                sb.append(line).append("\n");
+            }
+            jTextArea1.setText(sb.toString());
+        } catch (IOException e) {
+            // open a jdialog with the error
+            JOptionPane.showMessageDialog(this, "No se ha podido abrir este archivo, es posible que no exista\nRuta: " + e.getMessage());
+        }
+
+
+    }//GEN-LAST:event_jTree1MouseClicked
+
+    private DefaultMutableTreeNode getCurrentSelectedNode() {
+        return (DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent();
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTree jTree1;
     // End of variables declaration//GEN-END:variables
 }

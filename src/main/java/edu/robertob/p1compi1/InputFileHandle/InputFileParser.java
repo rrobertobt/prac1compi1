@@ -142,9 +142,14 @@ public class InputFileParser extends java_cup.runtime.lr_parser {
     private Project project;
     private DirectoryItem currentDirectory;
     private Stack<DirectoryItem> directoryStack = new Stack<>();
+    private List<String> errors = new ArrayList<>();
 
     public Project getProject() {
         return project;
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 
     public InputFileParser(InputFileLexer lexer) {
@@ -153,6 +158,15 @@ public class InputFileParser extends java_cup.runtime.lr_parser {
 
     protected int error_sync_size() {
         return 10;
+    }
+
+    private boolean isNameDuplicate(DirectoryItem directory, String name) {
+        for (ProjectItem item : directory.getContent()) {
+            if (item.getName().equals(name)) {
+                return true; // Name already exists
+            }
+        }
+        return false; // Name is not a duplicate
     }
 
 
@@ -257,13 +271,21 @@ class CUP$InputFileParser$actions {
 		int folderNameright = ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).right;
 		Object folderName = (Object)((java_cup.runtime.Symbol) CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).value;
 		
-    System.out.println("Folder name: " + folderName);
-    DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+        if (isNameDuplicate(currentDirectory, (String)folderName)) {
+            errors.add("- Directorio parece estar duplicado: " + folderName + " en " + currentDirectory.getName() + "Lin:" + folderNameleft + "Col:" + folderNameright + "\n");
+            DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+            currentDirectory = newDir;
+            directoryStack.push(currentDirectory);
+            RESULT = folderName;
+        } else {
+            DirectoryItem newDir = new DirectoryItem((String)folderName, new ArrayList<>());
+            newDir.setParent(currentDirectory);
             currentDirectory.getContent().add(newDir);
             directoryStack.push(currentDirectory);
-            System.out.println("test");
+            System.out.println(directoryStack.size() + " " + currentDirectory.getName() + " " + newDir.getName());
             currentDirectory = newDir;
             RESULT = folderName;
+        }
     
               CUP$InputFileParser$result = parser.getSymbolFactory().newSymbol("directory_open_tag",14, ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-3)), ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.peek()), RESULT);
             }
@@ -303,7 +325,15 @@ class CUP$InputFileParser$actions {
 		int locationAttrright = ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).right;
 		Object locationAttr = (Object)((java_cup.runtime.Symbol) CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).value;
 		 System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
-    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+        if (isNameDuplicate(currentDirectory, (String)nameAttr)) {
+            errors.add("- Archivo parece estar duplicado: " + nameAttr + " en " + currentDirectory.getName() + "Lin:" + nameAttrleft + "Col:" + nameAttrright + "\n");
+        } else {
+            var newFile = new FileItem((String)nameAttr, (String)locationAttr);
+            newFile.setParent(currentDirectory);
+            currentDirectory.getContent().add(newFile);
+
+
+        }
      
               CUP$InputFileParser$result = parser.getSymbolFactory().newSymbol("file_tag",7, ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-4)), ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.peek()), RESULT);
             }
@@ -320,7 +350,13 @@ class CUP$InputFileParser$actions {
 		int nameAttrright = ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).right;
 		Object nameAttr = (Object)((java_cup.runtime.Symbol) CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-1)).value;
 		 System.out.println("File name: " + nameAttr + ", location: " + locationAttr);
-    currentDirectory.getContent().add(new FileItem((String)nameAttr, (String)locationAttr));
+        if (isNameDuplicate(currentDirectory, (String)nameAttr)) {
+            errors.add("- Archivo parece estar duplicado: " + nameAttr + " en " + currentDirectory.getName() + "Lin:" + nameAttrleft + "Col:" + nameAttrright + "\n");
+        } else {
+            var newFile = new FileItem((String)nameAttr, (String)locationAttr);
+            newFile.setParent(currentDirectory);
+            currentDirectory.getContent().add(newFile);
+        }
     
               CUP$InputFileParser$result = parser.getSymbolFactory().newSymbol("file_tag",7, ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.elementAt(CUP$InputFileParser$top-4)), ((java_cup.runtime.Symbol)CUP$InputFileParser$stack.peek()), RESULT);
             }

@@ -4,10 +4,19 @@
  */
 package edu.robertob.p1compi1.Frames;
 
+import edu.robertob.p1compi1.Models.InputFileController;
 import edu.robertob.p1compi1.Models.InputFileHandler;
+import edu.robertob.p1compi1.Models.Project;
+import edu.robertob.p1compi1.Utils.ProjectUtils;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static edu.robertob.p1compi1.Utils.ProjectUtils.writeToFile;
 
 /**
  *
@@ -15,14 +24,18 @@ import java.util.logging.Logger;
  */
 public class MainFrame extends javax.swing.JFrame {
     
-    InputFileHandler inputFileHandler;
+    InputFileController inputFileController;
+    Boolean projectLoaded = false;
+    final JOptionPane addDirectoryOptionPane = new JOptionPane();
+    Project currentProject;
+
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
-        this.inputFileHandler = new InputFileHandler();
+        this.inputFileController = new InputFileController();
     }
 
     /**
@@ -38,6 +51,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         selectFileMenuItem = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -53,6 +67,14 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu1.add(selectFileMenuItem);
 
+        jMenuItem1.setText("Nuevo proyecto");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
         jMenuBar1.add(jMenu1);
 
         setJMenuBar(jMenuBar1);
@@ -61,69 +83,90 @@ public class MainFrame extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(193, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(322, 322, 322)
                 .addComponent(jLabel1)
-                .addGap(185, 185, 185))
+                .addContainerGap(335, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(177, 177, 177)
+                .addGap(274, 274, 274)
                 .addComponent(jLabel1)
-                .addContainerGap(200, Short.MAX_VALUE))
+                .addContainerGap(342, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    public void updateProjectTree () {
+
+    }
     private void selectFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFileMenuItemActionPerformed
-        try {
-            inputFileHandler.createIdeFileChooser();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        var result = inputFileController.parseInputFile();
+        System.out.println("Result: " + result);
+        if (result != null) {
+
+            this.getContentPane().removeAll();
+            this.repaint();
+            this.projectLoaded = true;
+            this.currentProject = result;
+            // add MainPanel
+            MainPanel mainPanel = new MainPanel(this.currentProject);
+            mainPanel.getjTree1().setModel(new DefaultTreeModel(ProjectUtils.getProjectTree(result.getContent().getContent(), result)));
+
+            this.getContentPane().add(mainPanel);
+            mainPanel.setSize(800, 600);
+            mainPanel.setVisible(true);
+            this.validate();
+            this.repaint();
+
+        } else {
+            // show a message dialog
+            JOptionPane.showMessageDialog(this, "No se ha cargado ningun archivo", "Información", JOptionPane.INFORMATION_MESSAGE);
+
+            // before removing the main panel, check if there is already open a valid project so we don't remove it
+            if (this.projectLoaded) return;
+
+            this.getContentPane().removeAll();
+            this.repaint();
+            // create new label
+            JLabel label = new JLabel("No hay projecto cargado");
+            label.setHorizontalAlignment(JLabel.CENTER);
+            label.setVerticalAlignment(JLabel.CENTER);
+            label.setSize(500, 300);
+            this.getContentPane().add(label);
+            this.validate();
         }
     }//GEN-LAST:event_selectFileMenuItemActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        String name = JOptionPane.showInputDialog(this, "Nombre del proyecto", "Nuevo proyecto", JOptionPane.QUESTION_MESSAGE);
+        if(name == null) return;
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre del proyecto no puede estar vacío", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        //</editor-fold>
+        // create new project content with only the root directory and the name from the input
+        String emptyProjectContentForFile = "<PROYECTO nombre=\"" + name + "\">\n" +
+                "    <CARPETA nombre=\"Carpeta base\">\n" +
+                "    </CARPETA>\n" +
+                "</PROYECTO>";
+        // ask the user to select a directory to save the file
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccione la carpeta donde guardar el archivo");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.showSaveDialog(this);
+        String path = fileChooser.getCurrentDirectory().getAbsolutePath().concat("/").concat(name).concat(".ide");
+        ProjectUtils.writeToFile(path, emptyProjectContentForFile);
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MainFrame().setVisible(true);
-            }
-        });
-    }
-
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem selectFileMenuItem;
     // End of variables declaration//GEN-END:variables
 }
