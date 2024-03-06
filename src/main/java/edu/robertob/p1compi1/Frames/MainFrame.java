@@ -149,7 +149,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
         // create new project content with only the root directory and the name from the input
         String emptyProjectContentForFile = "<PROYECTO nombre=\"" + name + "\">\n" +
-                "    <CARPETA nombre=\"Carpeta base\">\n" +
+                "    <CARPETA nombre=\"CarpetaBase\">\n" +
                 "    </CARPETA>\n" +
                 "</PROYECTO>";
         // ask the user to select a directory to save the file
